@@ -15,12 +15,6 @@
 
 @property (nonatomic, strong) SCStream *stream;
 @property (nonatomic, strong) NSWindow *monitorWindow;
-/*
-@property (nonatomic, strong) IOSurface *surface;
-@property (nonatomic) CVPixelBufferRef pbuf;
-@property (nonatomic) size_t pbufW;
-@property (nonatomic) size_t pbufH;
-*/
 
 -(void) updateMonitorWithData:(void*) data size:(size_t) size;
 @end

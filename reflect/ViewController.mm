@@ -18,22 +18,15 @@
             (id)kCVPixelBufferWidthKey : @(1512),
             (id)kCVPixelBufferHeightKey : @(982),
         };
-        
-        //memset(data, -999999, size);
-    /*
-    NSData* ndata = [(NSString*)CFBridgingRelease(data) dataUsingEncoding:NSUTF8StringEncoding];
-    void* buffer = malloc([ndata length]);
-    [ndata getBytes:buffer length:[ndata length]];
-    */
     
         CVPixelBufferRef pixelBuffer = NULL;
         CVPixelBufferCreateWithBytes(
             kCFAllocatorDefault,
-                                     w*1,
-                                     h*1,
-                                     kCVPixelFormatType_64RGBAHalf,//1380411457,//kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
-                                     (CVPixelBufferRef)data,//buffer
-                                     12160,//12160,w*4,
+                                     w,
+                                     h,
+                                     kCVPixelFormatType_64RGBAHalf,
+                                     (CVPixelBufferRef)data,
+                                     12160,//12160 for 1512x982; may need changing
             NULL,
             NULL,
             (__bridge CFDictionaryRef)pixelBufferAttributes,
@@ -42,27 +35,17 @@
     
     
     if(pixelBuffer != NULL){
-        CGImageRef cgImage = [[CIContext context] createCGImage:[CIImage imageWithCVPixelBuffer:pixelBuffer] fromRect:NSMakeRect(0, 0, 1512, 982)];
+        CGImageRef cgImage = [[CIContext context] createCGImage:[CIImage imageWithCVPixelBuffer:pixelBuffer] fromRect:NSMakeRect(0, 0, w, h)];
         NSImage* image = [[NSImage alloc] initWithCGImage:cgImage size:NSMakeSize(w, h)];
         CGImageRelease(cgImage);
         
-        NSImageView* imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(0, 0, 1512, 982)];
+        NSImageView* imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(0, 0, w, h)];
         imageView.image = image;
         imageView.hidden = NO;
         
         self.monitorWindow.contentView = imageView;
         [self.monitorWindow.contentView setNeedsDisplay:YES];
     }
-    /*
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSImageView* imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(0, 0, 1512, 982)];
-        imageView.image = image;
-        imageView.hidden = NO;
-        
-        self.monitorWindow.contentView = imageView;
-        [self.monitorWindow.contentView setNeedsDisplay:YES];
-    }); */
 }
 
 
@@ -110,9 +93,7 @@ didStopWithError:(NSError *) error{
 - (void) stream:(SCStream *) stream
 didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
          ofType:(SCStreamOutputType) type{
-    
-    //static int i = 0;
-    
+        
     if(!CMSampleBufferIsValid(sampleBuffer)){
         NSLog(@"sample invalid");
     }
@@ -132,31 +113,7 @@ didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
                 CVPixelBufferRef pbuf = CMSampleBufferGetImageBuffer(sampleBuffer);
                 CVPixelBufferLockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
                 
-                /*
-                self.pbuf = pbuf;
-                self.pbufW = CVPixelBufferGetWidth(self.pbuf);
-                self.pbufH = CVPixelBufferGetHeight(self.pbuf);
-                self.surface = (__bridge IOSurface *)CVPixelBufferGetIOSurface(pbuf);
-
-                
-
-                uint32_t seed = 123;
-                [self.surface lockWithOptions:kIOSurfaceLockReadOnly seed:&seed];
-                
-                void* sdata = [self.surface baseAddress];
-                size_t sdataSize = [self.surface allocationSize];
-                con->sendDataFragmented(sdata, sdataSize);
-                */
-                /*
-               NSData* data = [NSData dataWithBytes:CVPixelBufferGetBaseAddress(pbuf) length:CVPixelBufferGetDataSize(pbuf)];
-
-                NSString* str = [[NSString alloc] initWithData:data encoding: NSUTF8StringEncoding];
-                
-                con->sendDataFragmented((void*)CFBridgingRetain(str), [str length]);
-                 */
-                
                 con->sendDataFragmented(CVPixelBufferGetBaseAddress(pbuf), CVPixelBufferGetDataSize(pbuf));
-                //CVPixelBufferUnlockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
 
             }
             else{
@@ -187,12 +144,10 @@ didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
     dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 
     //stream config
-    SCStreamConfiguration* config = [SCStreamConfiguration new];//[SCStreamConfiguration streamConfigurationWithPreset: SCStreamConfigurationPresetCaptureHDRStreamLocalDisplay];
-    config.width = w*1; //CGDisplayBounds(CGMainDisplayID()).size.width;
-    config.height = h*1; //CGDisplayBounds(CGMainDisplayID()).size.height;
+    SCStreamConfiguration* config = [SCStreamConfiguration new];
+    config.width = w;
+    config.height = h;
     config.queueDepth = 6;
-    //config.pixelFormat = 1380411457;
-    //config.pixelFormat = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
     config.pixelFormat = kCVPixelFormatType_64RGBAHalf;
     
     self.stream = [[SCStream alloc] initWithFilter: filter configuration: config delegate:self];
@@ -227,7 +182,6 @@ didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
                                                             backing:NSBackingStoreBuffered
                                                               defer:NO];
         [self.monitorWindow setTitle:@"Another Window"];
-        //[self.monitorWindow setContentViewController:self];
         [self.monitorWindow makeKeyAndOrderFront:nil];
 }
 

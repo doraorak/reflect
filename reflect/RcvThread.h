@@ -1,94 +1,11 @@
 //
-//  LogThread.mm
+//  RcvThread.mm
 //  reflect
 //
 //  Created by Dora Orak on 16.12.2024.
 //
 
-
-
-/*
-#import <Foundation/Foundation.h>
-#include <vector>
-#include <map>
-#import "networking.h"
-
-
-@interface NSViewController (vc)
--(void) setSurface:(IOSurface*)arg1;
--(IOSurface*) surface;
--(void) updateMonitorWithData:(void*) arg1 size:(size_t) arg2;
-@end
-
-@interface NSApplication (category)
-
--(AppDelegate*) delegate;
-
-@end
-
-@interface RcvThread : NSThread
-
--(void) main;
-
-@end
-
-@implementation RcvThread
--(void) main{
-    
-    while(true){
-        static std::vector<char> buf;
-        static unsigned previousOrder = 0;
-        
-            void* rdata = malloc(1024*1024*50 * sizeof(char));
-            con->receiveData(rdata);
-            //std::cout << "recieved size: " << ((connection::packet*)rdata)->byteCount <<"\n";
-        if(((connection::packet*)rdata)->order > previousOrder){
-            if (((connection::packet*)rdata)->byteCount < sizeof(((connection::packet*)rdata)->bytes)) {//sizeof(((connection::packet*)rdata)->bytes)
-                
-                //Last fragment of a sent data
-                
-                buf.insert(buf.end(),((connection::packet*)rdata)->bytes,((connection::packet*)rdata)->bytes + ((connection::packet*)rdata)->byteCount);
-                
-                free(rdata);
-                rdata = NULL;
-                
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [[[(AppDelegate*)[NSApplication.sharedApplication delegate] window] contentViewController] updateMonitorWithData:buf.data() size:buf.size()];
-                });
-                
-                std::cout << "last bufsize: " << buf.size() << "\n";
-                buf.clear();
-                buf.shrink_to_fit();
-            }
-            else{
-                
-                buf.insert(buf.end(),((connection::packet*)rdata)->bytes,((connection::packet*)rdata)->bytes + ((connection::packet*)rdata)->byteCount);
-                
-                free(rdata);
-                rdata = NULL;
-            }
-        }
-    }
-}
-@end
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  #import <Foundation/Foundation.h>
- #include <stdlib.h>
  #import "networking.h"
 
 

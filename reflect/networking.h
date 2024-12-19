@@ -37,7 +37,7 @@ public:
         
         serverAddr.sin_family = AF_INET;
         serverAddr.sin_port = htons(27779); // Port number
-        serverAddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.171");
+        serverAddr.sin_addr.s_addr = INADDR_ANY;
         
         if((bind(socketfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr))) != 0) {
             std::cout << "Error binding socket";

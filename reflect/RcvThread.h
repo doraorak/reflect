@@ -135,12 +135,8 @@
 
 -(void) processPacket:(connection::packet*) packet size:(size_t) size
     {
-        std::cout << _highestOrder << "\n";
         
-            if(packet->order < _highestOrder){
-                //old packet
-                return;
-            }
+            
         
         if(_highestOrder == 0){
             _rbytes = calloc(packet->frameSize, 1);
@@ -153,13 +149,12 @@
         
         memcpy((char *)_rbytes + packet->byteOffset, packet->bytes, packet->byteCount);
         
-        if(packet->byteOffset == packet->frameSize - packet->byteCount){
+        if(packet->byteOffset == packet->frameSize - packet->byteCount){//arc4random_uniform(5000) == 0
+            
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[[(AppDelegate*)[NSApplication.sharedApplication delegate] window] contentViewController] updateMonitorWithData:_rbytes size:size];
             });
-            free(_rbytes);
-            _highestOrder = 0;
-            std::cout << "last ?" << "\n";
+    
         }
         
     }

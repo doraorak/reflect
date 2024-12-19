@@ -80,16 +80,7 @@ std::unique_ptr<connection> con;
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
-   /* NSLog(@"bye");
-    CFStringRef service = CFSTR("kTCCServiceScreenCapture");
-    
-    if(_TCCAccessResetForBundle(service, CFBundleGetMainBundle()) == 0) {
-                    NSLog(@"Could not reset approval status for ");
-                } else {
-                    NSLog(@"Successfully reset approval status for");
-                }
-    
-    CFRelease(service); */
+   
 }
 
 

@@ -14,8 +14,6 @@
 @interface ViewController : NSViewController <SCStreamDelegate, SCStreamOutput>
 
 @property (nonatomic, strong) SCStream *stream;
-@property (nonatomic, strong) NSWindow *monitorWindow;
 
--(void) updateMonitorWithData:(void*) data size:(size_t) size;
 @end
 

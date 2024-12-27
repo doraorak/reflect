@@ -10,22 +10,9 @@
 		14CB09522D0FA8F700164136 /* reflect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = reflect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		14C19A7F2D12F2AB00A7FD0D /* Exceptions for "reflect" folder in "Compile Sources" phase from "reflect" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 14CB094E2D0FA8F700164136 /* Sources */;
-			membershipExceptions = (
-				RcvThread.h,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		14CB09542D0FA8F700164136 /* reflect */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				14C19A7F2D12F2AB00A7FD0D /* Exceptions for "reflect" folder in "Compile Sources" phase from "reflect" target */,
-			);
 			path = reflect;
 			sourceTree = "<group>";
 		};

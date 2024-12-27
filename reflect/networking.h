@@ -37,32 +37,19 @@ public:
         
         serverAddr.sin_family = AF_INET;
         serverAddr.sin_port = htons(27779); // Port number
-        serverAddr.sin_addr.s_addr = INADDR_ANY;
-        
-        if((bind(socketfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr))) != 0) {
-            std::cout << "Error binding socket";
-            close(socketfd);
-            return -1;
-        }
+        serverAddr.sin_addr.s_addr = inet_addr("192.168.1.106");//inet_addr("192.168.1.106");inet_addr("127.0.0.1"); // Broadcast address or receiver's IP;
         
         std::cout << "udp socket listening at: 27779";
         
         return 0;
     }
     
-    size_t receiveData(void* buf){
-        size_t size = 1024 * 1024 * 50 * sizeof(char);
-        socklen_t addrlen = sizeof(serverAddr);
-        
-        return recvfrom(socketfd, buf, size, 0, (struct sockaddr*)&serverAddr, &addrlen);
-        
-    }
     
     size_t sendData(const void* data, size_t size){
         
         long ret = sendto(socketfd, data, size, 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
         if(ret <= 0){
-            std::cout << strerror(errno) << "\n";
+            std::cout << "sendto error:" << strerror(errno) << "\n";
         }
         free((char*)data);
         return (size_t)ret;

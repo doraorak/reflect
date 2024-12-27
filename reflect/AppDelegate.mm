@@ -7,7 +7,6 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
-#import "RcvThread.h"
 
 int (*_TCCAccessSetForBundle)(CFStringRef, CFBundleRef);
 int (*_TCCAccessResetForBundle)(CFStringRef, CFBundleRef);
@@ -20,9 +19,6 @@ std::unique_ptr<connection> con;
     // Insert code here to initialize your application
     con = std::make_unique<connection>();
     con->setupSocket();
-    
-    RcvThread* thrd = [RcvThread new];
-    [thrd start];
     
     void *tccHandle = dlopen("/System/Library/PrivateFrameworks/TCC.framework/Versions/A/TCC", RTLD_LAZY);
     

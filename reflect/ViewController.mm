@@ -10,7 +10,7 @@
 #define h 982
 
 @implementation ViewController
-
+/*
 -(void) updateMonitorWithData:(void*) data size:(size_t) size{
     NSDictionary *pixelBufferAttributes = @{
             (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_64RGBAHalf),
@@ -47,6 +47,7 @@
         [self.monitorWindow.contentView setNeedsDisplay:YES];
     }
 }
+*/
 
 
 - (void)viewDidLoad {
@@ -145,10 +146,12 @@ didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
 
     //stream config
     SCStreamConfiguration* config = [SCStreamConfiguration new];
+    //SCStreamConfiguration* config = [SCStreamConfiguration streamConfigurationWithPreset:SCStreamConfigurationPresetCaptureHDRStreamCanonicalDisplay];
     config.width = w;
     config.height = h;
-    config.queueDepth = 6;
-    config.pixelFormat = kCVPixelFormatType_64RGBAHalf;
+    config.queueDepth = 8;
+    config.pixelFormat = kCVPixelFormatType_32BGRA;//kCVPixelFormatType_64RGBAHalf; kCVPixelFormatType_32BGRA
+    config.colorSpaceName = kCGColorSpaceSRGB;
     
     self.stream = [[SCStream alloc] initWithFilter: filter configuration: config delegate:self];
     NSError* error = nil;
@@ -173,16 +176,6 @@ didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
         }
         NSLog(@"bad days are over");
         }];
-    
-        self.monitorWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(200, 200, 400, 300)
-                                                          styleMask:(NSWindowStyleMaskTitled |
-                                                                     NSWindowStyleMaskClosable |
-                                                                     NSWindowStyleMaskResizable |
-                                                                     NSWindowStyleMaskMiniaturizable)
-                                                            backing:NSBackingStoreBuffered
-                                                              defer:NO];
-        [self.monitorWindow setTitle:@"Another Window"];
-        [self.monitorWindow makeKeyAndOrderFront:nil];
 }
 
 @end

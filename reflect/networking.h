@@ -12,6 +12,11 @@
 #import <unistd.h>
 #import <errno.h>
 
+//#define IP "127.0.0.1" //localhost
+//#define IP "192.168.1.164" //iphone
+#define IP "192.168.1.106" //google tv
+
+
 class connection
 {
 public:
@@ -37,13 +42,32 @@ public:
         
         serverAddr.sin_family = AF_INET;
         serverAddr.sin_port = htons(27779); // Port number
-        serverAddr.sin_addr.s_addr = inet_addr("192.168.1.106");//inet_addr("192.168.1.106");inet_addr("127.0.0.1"); // Broadcast address or receiver's IP;
+        serverAddr.sin_addr.s_addr = inet_addr(IP);//inet_addr("192.168.1.106");inet_addr("127.0.0.1"); // Broadcast address or receiver's IP;
+        inet_pton(AF_INET, IP, &serverAddr.sin_addr);
         
-        std::cout << "udp socket listening at: 27779";
+        int reuse = 1;
+        if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+            perror("setsockopt");
+            return -1;
+        }
+        
+        int sbuf_size = 1024 * 1024 * 100; // Example: 100MB
+        if(setsockopt(socketfd, SOL_SOCKET, SO_SNDBUF, &sbuf_size, sizeof(sbuf_size)) < 0){
+            perror("setsockopt");
+            return -1;
+        }
+        if(setsockopt(socketfd, SOL_SOCKET, SO_RCVBUF, &sbuf_size, sizeof(sbuf_size)) < 0){
+            perror("setsockopt");
+            return -1;
+        }
+            
         
         return 0;
     }
     
+    int destroySocket(){
+            return close(socketfd);
+        }
     
     size_t sendData(const void* data, size_t size){
         
@@ -86,6 +110,10 @@ public:
                 std::cout << "couldn't send packet fragment";
             }
         }
+    }
+    
+    ~connection(){
+        this->destroySocket();
     }
 };
 

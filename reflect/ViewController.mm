@@ -10,45 +10,6 @@
 #define h 982
 
 @implementation ViewController
-/*
--(void) updateMonitorWithData:(void*) data size:(size_t) size{
-    NSDictionary *pixelBufferAttributes = @{
-            (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_64RGBAHalf),
-            (id)kCVPixelBufferCGImageCompatibilityKey: @(CFBooleanGetValue(kCFBooleanTrue)),
-            (id)kCVPixelBufferWidthKey : @(1512),
-            (id)kCVPixelBufferHeightKey : @(982),
-        };
-    
-        CVPixelBufferRef pixelBuffer = NULL;
-        CVPixelBufferCreateWithBytes(
-            kCFAllocatorDefault,
-                                     w,
-                                     h,
-                                     kCVPixelFormatType_64RGBAHalf,
-                                     (CVPixelBufferRef)data,
-                                     12160,//12160 for 1512x982; may need changing
-            NULL,
-            NULL,
-            (__bridge CFDictionaryRef)pixelBufferAttributes,
-            &pixelBuffer
-        );
-    
-    
-    if(pixelBuffer != NULL){
-        CGImageRef cgImage = [[CIContext context] createCGImage:[CIImage imageWithCVPixelBuffer:pixelBuffer] fromRect:NSMakeRect(0, 0, w, h)];
-        NSImage* image = [[NSImage alloc] initWithCGImage:cgImage size:NSMakeSize(w, h)];
-        CGImageRelease(cgImage);
-        
-        NSImageView* imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(0, 0, w, h)];
-        imageView.image = image;
-        imageView.hidden = NO;
-        
-        self.monitorWindow.contentView = imageView;
-        [self.monitorWindow.contentView setNeedsDisplay:YES];
-    }
-}
-*/
-
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -113,8 +74,16 @@ didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
             if ([statusNumber longValue] == SCFrameStatusComplete || [statusNumber longValue] == SCFrameStatusIdle){
                 CVPixelBufferRef pbuf = CMSampleBufferGetImageBuffer(sampleBuffer);
                 CVPixelBufferLockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
+                /*
+                static dispatch_once_t onceToken;
+                dispatch_once(&onceToken, ^{
+                    con->sendDataFragmented(CVPixelBufferGetBaseAddress(pbuf), CVPixelBufferGetDataSize(pbuf));
+                });
+                */
+               
                 
                 con->sendDataFragmented(CVPixelBufferGetBaseAddress(pbuf), CVPixelBufferGetDataSize(pbuf));
+
 
             }
             else{
@@ -152,6 +121,8 @@ didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
     config.queueDepth = 8;
     config.pixelFormat = kCVPixelFormatType_32BGRA;//kCVPixelFormatType_64RGBAHalf; kCVPixelFormatType_32BGRA
     config.colorSpaceName = kCGColorSpaceSRGB;
+    config.minimumFrameInterval = CMTimeMake(1, 60);
+    config.captureResolution = SCCaptureResolutionBest;
     
     self.stream = [[SCStream alloc] initWithFilter: filter configuration: config delegate:self];
     NSError* error = nil;

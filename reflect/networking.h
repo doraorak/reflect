@@ -4,6 +4,7 @@
 //
 //  Created by Dora Orak on 15.12.2024.
 //
+#pragma once
 
 #import <iostream>
 #import <sys/socket.h>
@@ -11,10 +12,12 @@
 #import <arpa/inet.h>
 #import <unistd.h>
 #import <errno.h>
+#import "lz4.h"
 
 //#define IP "127.0.0.1" //localhost
-//#define IP "192.168.1.164" //iphone
-#define IP "192.168.1.106" //google tv
+#define IP "192.168.1.187" //iphone
+//#define IP "192.168.1.153" //google tv
+//#define IP "0.0.0.0" //any
 
 
 class connection
@@ -28,7 +31,8 @@ public:
         unsigned byteOffset;
         unsigned byteCount;
         unsigned frameSize;
-        char bytes[4080]; // pick a number
+        unsigned stride;
+        char bytes[512]; // pick a number
         
     } typedef packet;
     
@@ -42,9 +46,11 @@ public:
         
         serverAddr.sin_family = AF_INET;
         serverAddr.sin_port = htons(27779); // Port number
-        serverAddr.sin_addr.s_addr = inet_addr(IP);//inet_addr("192.168.1.106");inet_addr("127.0.0.1"); // Broadcast address or receiver's IP;
+        serverAddr.sin_addr.s_addr = inet_addr(IP);
         inet_pton(AF_INET, IP, &serverAddr.sin_addr);
-        
+        //serverAddr.sin_addr.s_addr = INADDR_ANY;
+
+        /*
         int reuse = 1;
         if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
             perror("setsockopt");
@@ -60,7 +66,7 @@ public:
             perror("setsockopt");
             return -1;
         }
-            
+        */
         
         return 0;
     }
@@ -75,40 +81,56 @@ public:
         if(ret <= 0){
             std::cout << "sendto error:" << strerror(errno) << "\n";
         }
-        free((char*)data);
+    
         return (size_t)ret;
         
     }
     
-    void sendDataFragmented(const void* data, size_t size){
+    void sendDataFragmented(const void* data, size_t size, size_t stride){
         
-        size_t const fragmentSize = sizeof(((packet *)0)->bytes);
+        size_t constexpr fragmentSize = sizeof(((packet *)0)->bytes);
         
-        size_t packetCount = size/fragmentSize;
+        size_t newSize = 0;
+        void* newData = malloc(size);
+        newSize = LZ4_compress_default((const char*)data, (char*)newData, (int)size, (int)size);
+        
+        if(newSize <= 0){
+            std::cout << "compression error";
+            return;
+        }
+        
+        
+        size_t packetCount = newSize/fragmentSize;
+        
         if(size % fragmentSize != 0){
             packetCount++;
         }
         
         for (unsigned packetIndex = 0; packetIndex < packetCount; packetIndex++) {
-            packet* pkg = (packet*)malloc(sizeof(packet));
+            std::unique_ptr<connection::packet> pkg = std::make_unique<connection::packet>();
             
             pkg->byteOffset = fragmentSize * packetIndex;
             pkg->order = packetIndex+1;
             pkg->frameSize = (unsigned)size;
+            pkg->stride = (unsigned)stride;
             
             if(packetIndex != packetCount - 1){
                 pkg->byteCount = fragmentSize;
+            }
+            else{
+                pkg->byteCount = (unsigned)newSize - pkg->byteOffset;
+            }
+            
+            memcpy(pkg->bytes, (char *)newData + pkg->byteOffset, pkg->byteCount);
+            
+            if(sendData((void*)pkg.get(), sizeof(packet)) <= 0){
+                std::cout << "couldn't send packet fragment";
                 
             }
             else{
-                pkg->byteCount = (unsigned)size - pkg->byteOffset;
+                std::cout << "sent packet";
             }
             
-            memcpy(pkg->bytes, (char *)data + pkg->byteOffset, pkg->byteCount);
-            
-            if(sendData(pkg, sizeof(packet)) <= 0){
-                std::cout << "couldn't send packet fragment";
-            }
         }
     }
     

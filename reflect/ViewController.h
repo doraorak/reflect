@@ -4,7 +4,6 @@
 //
 //  Created by Dora Orak on 11.12.2024.
 //
-
 #import <Cocoa/Cocoa.h>
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
 #import <IOSurface/IOSurfaceObjC.h>

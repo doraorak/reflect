@@ -41,15 +41,13 @@ std::unique_ptr<connection> con;
         exit(0);
     }
     
-    CFStringRef service = CFSTR("kTCCServiceScreenCapture");
-    
-    if(_TCCAccessResetForBundle(service, CFBundleGetMainBundle()) == 0) {
+    if(_TCCAccessResetForBundle(CFSTR("kTCCServiceScreenCapture"), CFBundleGetMainBundle()) == 0) {
         NSLog(@"Could not reset approval status for ");
     } else {
         NSLog(@"Successfully reset approval status for");
     }
     
-    if(_TCCAccessSetForBundle(service, CFBundleGetMainBundle()) == 0) {
+    if(_TCCAccessSetForBundle(CFSTR("kTCCServiceScreenCapture"), CFBundleGetMainBundle()) == 0) {
         NSLog(@"Could not add approval status");
     } else {
         /* Tack on accessibility service as it seems to be a prerequisite */
@@ -57,7 +55,6 @@ std::unique_ptr<connection> con;
         NSLog(@"Successfully added approval status for");
     }
     
-    CFRelease(service);
     
     
     self.window = [[NSWindow alloc] initWithContentRect:[NSScreen mainScreen].frame

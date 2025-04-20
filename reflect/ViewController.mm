@@ -120,8 +120,8 @@ didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
     config.queueDepth = 4;
     config.pixelFormat = kCVPixelFormatType_32BGRA;//kCVPixelFormatType_64RGBAHalf; kCVPixelFormatType_32BGRA
     config.colorSpaceName = kCGColorSpaceSRGB;
-    config.minimumFrameInterval = CMTimeMake(1, 30);
-    //config.minimumFrameInterval = CMTimeMake(1, 60);
+    //config.minimumFrameInterval = CMTimeMake(1, 30);
+    config.minimumFrameInterval = CMTimeMake(1, 60);
     config.captureResolution = SCCaptureResolutionBest;
     
     self.stream = [[SCStream alloc] initWithFilter: filter configuration: config delegate:self];

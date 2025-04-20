@@ -30,6 +30,7 @@ public:
         unsigned order;
         unsigned byteOffset;
         unsigned byteCount;
+        unsigned compressedFrameSize;
         unsigned frameSize;
         unsigned stride;
         char bytes[512]; // pick a number
@@ -48,25 +49,6 @@ public:
         serverAddr.sin_port = htons(27779); // Port number
         serverAddr.sin_addr.s_addr = inet_addr(IP);
         inet_pton(AF_INET, IP, &serverAddr.sin_addr);
-        //serverAddr.sin_addr.s_addr = INADDR_ANY;
-
-        /*
-        int reuse = 1;
-        if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-            perror("setsockopt");
-            return -1;
-        }
-        
-        int sbuf_size = 1024 * 1024 * 100; // Example: 100MB
-        if(setsockopt(socketfd, SOL_SOCKET, SO_SNDBUF, &sbuf_size, sizeof(sbuf_size)) < 0){
-            perror("setsockopt");
-            return -1;
-        }
-        if(setsockopt(socketfd, SOL_SOCKET, SO_RCVBUF, &sbuf_size, sizeof(sbuf_size)) < 0){
-            perror("setsockopt");
-            return -1;
-        }
-        */
         
         return 0;
     }
@@ -99,18 +81,18 @@ public:
             return;
         }
         
-        
         size_t packetCount = newSize/fragmentSize;
         
-        if(size % fragmentSize != 0){
+        if(newSize % fragmentSize != 0){
             packetCount++;
         }
         
         for (unsigned packetIndex = 0; packetIndex < packetCount; packetIndex++) {
-            std::unique_ptr<connection::packet> pkg = std::make_unique<connection::packet>();
+            connection::packet* pkg = new packet;
             
             pkg->byteOffset = fragmentSize * packetIndex;
             pkg->order = packetIndex+1;
+            pkg->compressedFrameSize = (unsigned)newSize;
             pkg->frameSize = (unsigned)size;
             pkg->stride = (unsigned)stride;
             
@@ -123,15 +105,16 @@ public:
             
             memcpy(pkg->bytes, (char *)newData + pkg->byteOffset, pkg->byteCount);
             
-            if(sendData((void*)pkg.get(), sizeof(packet)) <= 0){
+            if(sendData((void*)pkg, sizeof(packet)) <= 0){
                 std::cout << "couldn't send packet fragment";
-                
             }
             else{
-                std::cout << "sent packet";
+                std::cout << "sent packet\n";
             }
             
+            delete pkg;
         }
+        free(newData);
     }
     
     ~connection(){
